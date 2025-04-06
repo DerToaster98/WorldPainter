@@ -6,6 +6,7 @@
         <artifactId>WorldPainter</artifactId>
         <version>2.23.3-SNAPSHOT</version>
     </parent>
+    <packaging>jar</packaging>
 
     <artifactId>WPCore</artifactId>
 

@@ -9,6 +9,8 @@
 
     <artifactId>WPGUI</artifactId>
 
+    <packaging>jar</packaging>
+
     <dependencies>
         <dependency>
             <groupId>org.pepsoft.worldpainter</groupId>
