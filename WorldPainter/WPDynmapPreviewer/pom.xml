@@ -15,6 +15,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>javax.vecmath</groupId>
+            <artifactId>vecmath</artifactId>
+            <version>1.5.2</version>
+        </dependency>
+        <dependency>
             <groupId>org.pepsoft.worldpainter</groupId>
             <artifactId>WPCore</artifactId>
             <version>${project.version}</version>
