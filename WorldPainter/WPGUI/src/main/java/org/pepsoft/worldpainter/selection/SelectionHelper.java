@@ -25,8 +25,12 @@ import static org.pepsoft.worldpainter.Constants.TILE_SIZE_BITS;
  * <p>Created by Pepijn Schmitz on 03-11-16.
  */
 public class SelectionHelper {
+
+    private Dimension targetDimension;
+
     public SelectionHelper(Dimension dimension) {
         this.dimension = dimension;
+        this.targetDimension = dimension;
     }
 
     public void addToSelection(Shape shape) {
@@ -391,12 +395,12 @@ chunks:         for (int chunkX = 0; chunkX < TILE_SIZE; chunkX += 16) {
             final int srcY = (tile.getY() << TILE_SIZE_BITS) | yInTile;
             final int dstX = srcX + dx;
             final int dstY = srcY + dy;
-            if (options.createNewTiles && (! dimension.isTilePresent(dstX >> TILE_SIZE_BITS, dstY >> TILE_SIZE_BITS))) {
+            if (options.createNewTiles && (! this.targetDimension.isTilePresent(dstX >> TILE_SIZE_BITS, dstY >> TILE_SIZE_BITS))) {
                 if (clearUndoOnNewTileCreation) {
-                    dimension.clearUndo();
+                    this.targetDimension.clearUndo();
                     clearUndoOnNewTileCreation = false;
                 }
-                dimension.addTile(dimension.getTileFactory().createTile(dstX >> TILE_SIZE_BITS, dstY >> TILE_SIZE_BITS));
+                this.targetDimension.addTile(dimension.getTileFactory().createTile(dstX >> TILE_SIZE_BITS, dstY >> TILE_SIZE_BITS));
             }
             if (options.doBlending) {
                 float distanceFromEdge = distanceToSelectionEdge(srcX, srcY);
@@ -414,18 +418,18 @@ chunks:         for (int chunkX = 0; chunkX < TILE_SIZE; chunkX += 16) {
 
     private void copyColumn(Tile srcTile, int srcXInTile, int srcYInTile, int dstX, int dstY) {
         if (options.copyHeights) {
-            dimension.setRawHeightAt(dstX, dstY, srcTile.getRawHeight(srcXInTile, srcYInTile));
+            this.targetDimension.setRawHeightAt(dstX, dstY, srcTile.getRawHeight(srcXInTile, srcYInTile));
         }
         if (options.copyTerrain) {
-            dimension.setTerrainAt(dstX, dstY, srcTile.getTerrain(srcXInTile, srcYInTile));
+            this.targetDimension.setTerrainAt(dstX, dstY, srcTile.getTerrain(srcXInTile, srcYInTile));
         }
         if (options.copyFluids) {
-            dimension.setWaterLevelAt(dstX, dstY, srcTile.getWaterLevel(srcXInTile, srcYInTile));
-            dimension.setBitLayerValueAt(FloodWithLava.INSTANCE, dstX, dstY, srcTile.getBitLayerValue(FloodWithLava.INSTANCE, srcXInTile, srcYInTile));
+            this.targetDimension.setWaterLevelAt(dstX, dstY, srcTile.getWaterLevel(srcXInTile, srcYInTile));
+            this.targetDimension.setBitLayerValueAt(FloodWithLava.INSTANCE, dstX, dstY, srcTile.getBitLayerValue(FloodWithLava.INSTANCE, srcXInTile, srcYInTile));
         }
         if (options.copyLayers) {
             if (options.removeExistingLayers) {
-                dimension.clearLayerData(dstX, dstY, SKIP_LAYERS);
+                this.targetDimension.clearLayerData(dstX, dstY, SKIP_LAYERS);
             }
             Map<Layer, Integer> layerValues = srcTile.getLayersAt(srcXInTile, srcYInTile);
             layerValues.forEach((layer, value) -> {
@@ -435,11 +439,11 @@ chunks:         for (int chunkX = 0; chunkX < TILE_SIZE; chunkX += 16) {
                 switch (layer.getDataSize()) {
                     case BIT:
                     case BIT_PER_CHUNK:
-                        dimension.setBitLayerValueAt(layer, dstX, dstY, value != 0);
+                        this.targetDimension.setBitLayerValueAt(layer, dstX, dstY, value != 0);
                         break;
                     case BYTE:
                     case NIBBLE:
-                        dimension.setLayerValueAt(layer, dstX, dstY, value);
+                        this.targetDimension.setLayerValueAt(layer, dstX, dstY, value);
                         break;
                     case NONE:
                         throw new UnsupportedOperationException("Don't know how to copy layer " + layer);
@@ -447,29 +451,29 @@ chunks:         for (int chunkX = 0; chunkX < TILE_SIZE; chunkX += 16) {
             });
         }
         if (options.copyAnnotations) {
-            dimension.setLayerValueAt(Annotations.INSTANCE, dstX, dstY, srcTile.getLayerValue(Annotations.INSTANCE, srcXInTile, srcYInTile));
+            this.targetDimension.setLayerValueAt(Annotations.INSTANCE, dstX, dstY, srcTile.getLayerValue(Annotations.INSTANCE, srcXInTile, srcYInTile));
         }
         if (options.copyBiomes) {
-            dimension.setLayerValueAt(Biome.INSTANCE, dstX, dstY, srcTile.getLayerValue(Biome.INSTANCE, srcXInTile, srcYInTile));
+            this.targetDimension.setLayerValueAt(Biome.INSTANCE, dstX, dstY, srcTile.getLayerValue(Biome.INSTANCE, srcXInTile, srcYInTile));
         }
     }
 
     private void copyColumn(Tile srcTile, int srcXInTile, int srcYInTile, int dstX, int dstY, float blend) {
         if (options.copyHeights) {
-            dimension.setRawHeightAt(dstX, dstY, Math.round(blend * srcTile.getRawHeight(srcXInTile, srcYInTile) + (1 - blend) * dimension.getRawHeightAt(dstX, dstY)));
+            this.targetDimension.setRawHeightAt(dstX, dstY, Math.round(blend * srcTile.getRawHeight(srcXInTile, srcYInTile) + (1 - blend) * this.targetDimension.getRawHeightAt(dstX, dstY)));
         }
         if (options.copyTerrain && (RANDOM.nextFloat() <= blend)) {
-            dimension.setTerrainAt(dstX, dstY, srcTile.getTerrain(srcXInTile, srcYInTile));
+            this.targetDimension.setTerrainAt(dstX, dstY, srcTile.getTerrain(srcXInTile, srcYInTile));
         }
         if (options.copyFluids) {
-            dimension.setWaterLevelAt(dstX, dstY, Math.round(blend * srcTile.getWaterLevel(srcXInTile, srcYInTile) + (1 - blend) * dimension.getWaterLevelAt(dstX, dstY)));
+            this.targetDimension.setWaterLevelAt(dstX, dstY, Math.round(blend * srcTile.getWaterLevel(srcXInTile, srcYInTile) + (1 - blend) * this.targetDimension.getWaterLevelAt(dstX, dstY)));
             if (RANDOM.nextFloat() <= blend) {
-                dimension.setBitLayerValueAt(FloodWithLava.INSTANCE, dstX, dstY, srcTile.getBitLayerValue(FloodWithLava.INSTANCE, srcXInTile, srcYInTile));
+                this.targetDimension.setBitLayerValueAt(FloodWithLava.INSTANCE, dstX, dstY, srcTile.getBitLayerValue(FloodWithLava.INSTANCE, srcXInTile, srcYInTile));
             }
         }
         if (options.copyLayers) {
             if (options.removeExistingLayers && (RANDOM.nextFloat() <= blend)) {
-                dimension.clearLayerData(dstX, dstY, SKIP_LAYERS);
+                this.targetDimension.clearLayerData(dstX, dstY, SKIP_LAYERS);
             }
             Map<Layer, Integer> layerValues = srcTile.getLayersAt(srcXInTile, srcYInTile);
             layerValues.forEach((layer, value) -> {
@@ -480,12 +484,12 @@ chunks:         for (int chunkX = 0; chunkX < TILE_SIZE; chunkX += 16) {
                     case BIT:
                     case BIT_PER_CHUNK:
                         if (RANDOM.nextFloat() <= blend) {
-                            dimension.setBitLayerValueAt(layer, dstX, dstY, value != 0);
+                            this.targetDimension.setBitLayerValueAt(layer, dstX, dstY, value != 0);
                         }
                         break;
                     case BYTE:
                     case NIBBLE:
-                        dimension.setLayerValueAt(layer, dstX, dstY, Math.round(blend * value + (1 - blend) * dimension.getLayerValueAt(layer, dstX, dstY)));
+                        this.targetDimension.setLayerValueAt(layer, dstX, dstY, Math.round(blend * value + (1 - blend) * this.targetDimension.getLayerValueAt(layer, dstX, dstY)));
                         break;
                     case NONE:
                         throw new UnsupportedOperationException("Don't know how to copy layer " + layer);
@@ -493,10 +497,10 @@ chunks:         for (int chunkX = 0; chunkX < TILE_SIZE; chunkX += 16) {
             });
         }
         if (options.copyAnnotations && (RANDOM.nextFloat() <= blend)) {
-            dimension.setLayerValueAt(Annotations.INSTANCE, dstX, dstY, srcTile.getLayerValue(Annotations.INSTANCE, srcXInTile, srcYInTile));
+            this.targetDimension.setLayerValueAt(Annotations.INSTANCE, dstX, dstY, srcTile.getLayerValue(Annotations.INSTANCE, srcXInTile, srcYInTile));
         }
         if (options.copyBiomes && (RANDOM.nextFloat() <= blend)) {
-            dimension.setLayerValueAt(Biome.INSTANCE, dstX, dstY, srcTile.getLayerValue(Biome.INSTANCE, srcXInTile, srcYInTile));
+            this.targetDimension.setLayerValueAt(Biome.INSTANCE, dstX, dstY, srcTile.getLayerValue(Biome.INSTANCE, srcXInTile, srcYInTile));
         }
     }
 
@@ -697,4 +701,8 @@ outer:  for (int dx = -1; dx <= 1; dx++) {
     private static final Set<Layer> SKIP_LAYERS = new HashSet<>(Arrays.asList(Biome.INSTANCE, SelectionChunk.INSTANCE,
             SelectionBlock.INSTANCE, NotPresent.INSTANCE, NotPresentBlock.INSTANCE, Annotations.INSTANCE,
             FloodWithLava.INSTANCE));
+
+    void setDestDimension(final Dimension dimension) {
+        this.targetDimension = dimension;
+    }
 }
