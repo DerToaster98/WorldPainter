@@ -60,6 +60,7 @@ public class CopySelectionOperation extends MouseOrTabletOperation {
             return;
         }
         dimension.setEventsInhibited(true);
+        selectionHelper.setDestDimension(getDimension());
         try {
             // TODO: opening the progress dialog (and presumeably any dialog)
             // causes the JIDE docking framework to malfunction

@@ -4,6 +4,7 @@ import org.pepsoft.util.MathUtils;
 import org.pepsoft.util.ProgressReceiver;
 import org.pepsoft.worldpainter.Dimension;
 import org.pepsoft.worldpainter.Tile;
+import org.pepsoft.worldpainter.WorldPainterView;
 import org.pepsoft.worldpainter.brushes.Brush;
 import org.pepsoft.worldpainter.layers.*;
 import org.pepsoft.worldpainter.operations.Filter;
