@@ -38,7 +38,7 @@ public class SelectionPaint extends AbstractPaint {
     public void remove(Dimension dimension, int x, int y, float dynamicLevel) {
         if (dimension != this.dimension) {
             this.dimension = dimension;
-            selectionHelper = new SelectionHelper(dimension);
+            selectionHelper.setDestDimension(dimension);
         }
         try {
             selectionHelper.removeFromSelection(x, y, brush, filter, dynamicLevel, null);
@@ -52,7 +52,7 @@ public class SelectionPaint extends AbstractPaint {
     public void applyPixel(Dimension dimension, int x, int y) {
         if (dimension != this.dimension) {
             this.dimension = dimension;
-            selectionHelper = new SelectionHelper(dimension);
+            selectionHelper.setDestDimension(dimension);
         }
     }
 
@@ -60,7 +60,7 @@ public class SelectionPaint extends AbstractPaint {
     public void removePixel(Dimension dimension, int x, int y) {
         if (dimension != this.dimension) {
             this.dimension = dimension;
-            selectionHelper = new SelectionHelper(dimension);
+            selectionHelper.setDestDimension(dimension);
         }
     }
 
